@@ -1,0 +1,49 @@
+Package: sma
+Title: Metagenomics Analysis
+Version: 0.0.1
+Description: This project analysis seagrass metagenomics data
+Authors@R: c(
+  person("Debby", "Ng", email = "torva.anser@gmail.com" role = c("aut", "cph"))),
+  person("Abraham", "Sotelo", email = "asoteloa@outlook.com", role = c("cre")),
+  person("Lam Hai", "Ha", email = "ha.lam.hai@u.nus.edu", role = "aut")
+License: MIT
+Depends: R (>= 4.3.3)
+Imports:
+  AICcmodavg,
+  Biostrings,
+  DESeq2,
+  GEOquery,
+  Polychrome,
+  RColorBrewer,
+  broom,
+  dada2,
+  dplyr,
+  fantaxtic,
+  ggalluvial,
+  ggnested,
+  ggplot2,
+  ggpubr,
+  ggsci,
+  ggsignif,
+  ggstatsplot,
+  ggtext,
+  ggh4x,
+  grid,
+  gridExtra,
+  kableExtra,
+  knitr,
+  microbiome,
+  phyloseq,
+  rBLAST,
+  stringr,
+  taxonomizr,
+  texreg,
+  tidyverse,
+  vegan
+Suggests:
+  languageserver,
+  vscDebugger
+Encoding: UTF-8
+Remotes:
+  gmteunisse/fantaxtic
+SystemRequirements: CMake
