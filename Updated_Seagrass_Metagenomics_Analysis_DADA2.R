@@ -41,9 +41,9 @@ library(ggstatsplot)
 taxonomy_training_data_wSpecies <- "silva_nr99_v138.1_wSpecies_train_set.fa.gz"
 
 #### Loading data files from previous runs ####
-
-readRDS("seqtab_nochim_combined.RDS") ## combined seqtab without chimeras
-readRDS("taxa_combined_all.RDS") ## combined taxas
+# Commented following lines as the objects are not used in the code below
+#readRDS("seqtab_nochim_combined.RDS") ## combined seqtab without chimeras
+#readRDS("taxa_combined_all.RDS") ## combined taxas
 
 #### Loading updated metadata ####
 
