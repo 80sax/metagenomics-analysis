@@ -56,7 +56,8 @@ meta <- meta[order(rownames(meta)),] ## order metadata by sample ID
 
 #### Pre-processing of data files ####
 
-sample_path <- "N2416594_30-1058248066_Meta_2024-08-12/MS240808-2565" ## input path from working directory to folder containing fastq files
+# TODO: Remove hardcoded paths and use arguments to pass the paths and relative paths
+sample_path <- "DNA Sequences/N2416594_30-1058248066_Meta_2024-08-12/MS240808-2565" ## input path from working directory to folder containing fastq files
 files <- list.files(sample_path) ## regex to search
 newname <- sub('DNA-','', files) ## new name
 file.rename(file.path(sample_path,files), file.path(sample_path, newname)) ##rename files
@@ -106,16 +107,18 @@ Fs_path <- sort(list.files(fwd_reads_path, full.names = TRUE))
 Rs_path <- sort(list.files(rev_reads_path, full.names = TRUE))
 
 paths <- c(Fs_path, Rs_path)
+paths <- paths[-grep(":Zone.Identifier$", paths)]
 
+# TODO: Unnecesary to use two loops here. Can be simplified to one loop.
 for (path in paths)
 {
-  for (file in path)
-  {
-    print(file)
-    foo <- readLines(file)
-    seqlens <- sapply(foo[seq(2,length(foo),4)], nchar)
-    quallens <- sapply(foo[seq(4,length(foo),4)], nchar)
-    faulty_files[[file]] <- as.character(which(seqlens != quallens))
+  if (!file.exists(path) || !file.info(path)$isdir) {
+    cat(path, "\n")
+    foo <- readLines(path)
+    cat("Length of line:", length(foo), "\n")
+    seqlens <- sapply(foo[seq(2, length(foo), 4)], nchar)
+    quallens <- sapply(foo[seq(4, length(foo), 4)], nchar)
+    faulty_files[[path]] <- as.character(which(seqlens != quallens))
   }
 }
 
