@@ -1,0 +1,10 @@
+{
+  "r.bracketedPaste": true,
+  "r.libPaths": [
+    ""
+  ],
+  "r.rpath.linux": "/usr/bin/R",
+  "r.rpath.windows": "\\\\wsl.localhost\\Ubuntu-24.04\\usr\\bin\\R",
+  "r.rterm.linux": "",
+  "r.debugger.timeouts.startup": 5000
+}

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Find all R files that are staged for commit
+files=$(git diff --cached --name-only --diff-filter=d | grep -E '\.(R|r)$')
+
+for file in $files; do
+    # Update the date line in the file
+    sed -i 's/^# Date: .*/# Date: '"$(date +%Y-%m-%d)"'/' "$file"
+    
+    # Stage the modified file
+    if [ -f "$file" ]; then
+        git add "$file"
+    fi
+done
+
+exit 0
