@@ -11,15 +11,14 @@ Depends: R (>= 4.3.3)
 Imports:
   AICcmodavg,
   Biostrings,
-  DESeq2,
-  GEOquery,
-  Polychrome,
-  RColorBrewer,
   broom,
   dada2,
+  DESeq2,
   dplyr,
   fantaxtic,
+  GEOquery,
   ggalluvial,
+  ggh4x,
   ggnested,
   ggplot2,
   ggpubr,
@@ -27,14 +26,15 @@ Imports:
   ggsignif,
   ggstatsplot,
   ggtext,
-  ggh4x,
   grid,
   gridExtra,
   kableExtra,
   knitr,
   microbiome,
   phyloseq,
+  Polychrome,
   rBLAST,
+  RColorBrewer,
   stringr,
   taxonomizr,
   texreg,
@@ -42,7 +42,10 @@ Imports:
   vegan
 Suggests:
   languageserver,
+  rmarkdown,
+  testthat (>= 3.0.0),
   vscDebugger
+Config/testthat/edition: 3
 Encoding: UTF-8
 Remotes:
   gmteunisse/fantaxtic

@@ -12,3 +12,11 @@ Rscript setup.R --prepare
 ```R
 renv::restore()
 ```
+
+## Run unit tests
+- Unit tests are implemented with the [testthat](https://testthat.r-lib.org/) framework.
+- Test are located in the folder `tests`
+- To execute the tests run:
+```bash
+./run_tests.sh
+```
