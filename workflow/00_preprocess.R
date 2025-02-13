@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-12
+# Date: 2025-02-13
 #
 # Description: Load and clean DNA samples
 #
@@ -11,35 +11,39 @@
 # Outputs:
 #
 # ------------------------------------------------------
-
+suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
 
 source("workflow/utils/config.R")
 
-print(config)
+# ------------------------------------------------------
+# Internal functions
+# ------------------------------------------------------
+internal_clean_filename <- function(filename) {
+  sub("DNA-", "", filename) %>% sub("[.]gz$", "", .)
+}
 
-#load_dna_samples <- function(raw_samples_path, dna_samples_path) {
-#  # Load DNA samples
-#  cat("Loading samples", "\n")
-#  files <- list.files(raw_samples_path)
-#  newname <- sub("DNA-", "", files) ## new name
-#  file.rename(file.path(raw_samples_path,files), file.path(raw_samples_path, newname)) ##rename files
-#
-#  if (!dir.exists(dna_samples_path)) {
-#    dir.create(dna_samples_path, recursive = TRUE)
-#  }
-#
-#  extracted_files <- list()
-#  for (file in list.files(path = raw_samples_path, pattern = ".fq.gz", full.names = TRUE)) {
-#    cat("Extracting file: ", file, "\n")
-#    extracted_file_path <- gunzip(file, remove = FALSE) ## unzip all files
-#    new_file_path <- file.path(dna_samples_path, basename(extracted_file_path))
-#    file.rename(extracted_file_path, new_file_path)
-#    extracted_files <- c(extracted_files, new_file_path)
-#  }
-#  cat("\nExtracted files:\n")
-#  cat(paste0(extracted_files, collapse = "\n"))
-#  #for (file in extracted_files) {
-#  #  cat(file, "\n")
-#  }
-#}
+# ------------------------------------------------------
+# External functions
+# ------------------------------------------------------
+
+decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_data_dictionary) {
+  cat("Decompressing raw samples", "\n")
+  if (!dir.exists(raw_samples_path)) {
+    stop("Raw samples directory does not exist")
+    return("Error")
+  }
+  directories <- list.dirs(raw_samples_path, full.names = FALSE, recursive = FALSE)
+  for (dir in directories) {
+    cat("Decompressing files in directory:", dir, "\n")
+    files <- list.files(file.path(raw_samples_path, dir), pattern = "\\.gz$")
+    mapply(function(file, dest) {
+                                 cat("Decompressing file:", file, "->", dest, "\n")
+                                 gunzip(file, destname = dest, remove = FALSE, overwrite = TRUE)},
+    file.path(raw_samples_path, dir, files),
+    file.path(dna_sequences_path, raw_data_dictionary[[dir]], internal_clean_filename(files)))
+  }
+}
+
+
+decompress_raw_samples(raw_samples_path, dna_sequences_path, raw_data_dictionary)
