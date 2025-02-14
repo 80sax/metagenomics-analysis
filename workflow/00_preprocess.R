@@ -14,7 +14,13 @@
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
 
+# Load configuration ------------------------------------
 source("workflow/utils/config.R")
+config <- get_config("preprocessing")
+raw_samples_path <- config$raw_samples_path
+dna_sequences_path <- config$dna_sequences_path
+raw_data_dictionary <- config$raw_data_dictionary
+
 
 # ------------------------------------------------------
 # Internal functions
@@ -22,6 +28,7 @@ source("workflow/utils/config.R")
 internal_clean_filename <- function(filename) {
   sub("DNA-", "", filename) %>% sub("[.]gz$", "", .)
 }
+
 
 # ------------------------------------------------------
 # External functions

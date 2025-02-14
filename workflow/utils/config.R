@@ -3,10 +3,16 @@
 # Authors: Abraham Sotelo
 # Date: 2025-02-13
 #
-# Description: Workflow configuration parameters
+# Description: Workflow configuration loader
 # ------------------------------------------------------
 
-# Preprocessing samples
-raw_samples_path <- "data/raw"
-dna_sequences_path <- "data/dna_sequences"
-raw_data_dictionary <- list("39sample0" = "N2212879_30-780318117_Meta_2023-02-21")
+get_config <- function(module = c("state", "preprocessing")) {
+  module <- match.arg(module)
+  config <- yaml::read_yaml("config.yaml")
+
+  if (!module %in% names(config)) {
+    stop(sprintf("Configuration module '%s' not found", module))
+  }
+
+  config[[module]]
+}
