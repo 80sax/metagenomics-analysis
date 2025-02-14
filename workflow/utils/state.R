@@ -1,7 +1,7 @@
 # ------------------------------------------------------
-# File: status.R
+# File: state.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-13
+# Date: 2025-02-14
 #
 # Description: Data pipeline status management
 # ------------------------------------------------------
@@ -9,13 +9,13 @@
 # Load configuration ------------------------------------
 source("workflow/utils/config.R")
 config <- get_config("state")
-state_path <- config$state_path
+path <- config$state_path
 file_prefix <- config$file_prefix
 
 # ------------------------------------------------------
 # Internal functions
 # ------------------------------------------------------
-internal_create_state_file <- function() {
+internal_create_state_file <- function(state_path = path) {
   cat("Creating state file", "\n")
   if (!dir.exists(state_path)) {
     dir.create(state_path, recursive = TRUE)
@@ -28,16 +28,16 @@ internal_create_state_file <- function() {
     }
   }
   if (length(state_files) > 0) {
-    versions <- gsub(paste0(file_prefix, "_(.*)\\.json"), "\\1", basename(state_files))
+    versions <- gsub(paste0(file_prefix, "_v(.*)\\.json"), "\\1", basename(state_files))
     max_version <- max(versions)
     version_parts <- strsplit(max_version, "\\.")[[1]]
-    version_parts[3] <- as.character(as.numeric(version_parts[3]) + 1)
+    version_parts[2] <- as.character(as.numeric(version_parts[2]) + 1)
     version <- paste(version_parts, collapse = ".")
   } else {
-    version <- "1.0.0"
+    version <- "1.0"
   }
 
-  file <- paste0(state_path, "/", file_prefix, "_", version, ".json")
+  file <- paste0(state_path, "/", file_prefix, "_v", version, ".json")
 
   state <- list(
     metadata = list(
