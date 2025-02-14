@@ -1,10 +1,13 @@
 {
   "r.bracketedPaste": true,
-  "r.libPaths": [
-    ""
-  ],
-  "r.rpath.linux": "/usr/bin/R",
-  "r.rpath.windows": "\\\\wsl.localhost\\Ubuntu-24.04\\usr\\bin\\R",
-  "r.rterm.linux": "",
-  "r.debugger.timeouts.startup": 5000
+  "r.libPaths": ["YOUR LIBS PATH HERE"],
+  "r.rpath.linux": "YOUR PATH HERE",
+  "r.rpath.windows": "YOUR PATH HERE",
+  "r.rterm.linux": "YOUR PATH HERE",
+  "r.debugger.timeouts.startup": 15000,
+  "files.exclude": {
+    "Forms": true,
+    "Older Files": true,
+    "Older Scripts": true
+  }
 }
