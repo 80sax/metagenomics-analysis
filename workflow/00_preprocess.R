@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-13
+# Date: 2025-02-14
 #
 # Description: Load and clean DNA samples
 #
@@ -53,4 +53,4 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
 }
 
 
-decompress_raw_samples(raw_samples_path, dna_sequences_path, raw_data_dictionary)
+#decompress_raw_samples(raw_samples_path, dna_sequences_path, raw_data_dictionary)
