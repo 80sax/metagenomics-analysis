@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: test_state.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-14
+# Date: 2025-02-17
 #
 # Description: Testing state management
 # ------------------------------------------------------
@@ -27,6 +27,7 @@ test_that("empty state file is created correctly", {
   expect_true(file.exists(file_1_0))  # Initial version should exist
   expect_true(file.exists(file_1_1))  # Subsequent version should exist
   expect_true("metadata" %in% names(json_data))  # Metadata list should be present
+  expect_true("samples" %in% names(json_data))  # Metadata list should be present
   expect_true(all(c("created", "last_modified", "version", "number_of_samples") %in% names(json_data$metadata)))
 
   # Cleanup
