@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-14
+# Date: 2025-02-17
 #
 # Description: Load and clean DNA samples
 #
@@ -25,8 +25,14 @@ raw_data_dictionary <- config$raw_data_dictionary
 # ------------------------------------------------------
 # Internal functions
 # ------------------------------------------------------
+
+#' Clean DNA sequence filename
+#' 
+#' @param filename A string containing the filename to clean
+#' @return A string with "DNA-" prefix and ".gz" suffix removed, and fq extension replaced with fastq
+#' @keywords internal
 internal_clean_filename <- function(filename) {
-  sub("DNA-", "", filename) %>% sub("[.]gz$", "", .)
+  sub("DNA-", "", filename) %>% sub("[.]gz$", "", .) %>% sub("[.]fq$", ".fastq", .)
 }
 
 
@@ -34,6 +40,13 @@ internal_clean_filename <- function(filename) {
 # External functions
 # ------------------------------------------------------
 
+#' Decompress raw DNA sample files
+#' 
+#' @param raw_samples_path Path to directory containing compressed raw samples
+#' @param dna_sequences_path Path to directory where decompressed files will be saved
+#' @param raw_data_dictionary Dictionary mapping source directories to destination directories
+#' @return None
+#' @export
 decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_data_dictionary) {
   cat("Decompressing raw samples", "\n")
   if (!dir.exists(raw_samples_path)) {
@@ -51,6 +64,7 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
     file.path(dna_sequences_path, raw_data_dictionary[[dir]], internal_clean_filename(files)))
   }
 }
+
 
 
 #decompress_raw_samples(raw_samples_path, dna_sequences_path, raw_data_dictionary)
