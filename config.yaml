@@ -1,0 +1,17 @@
+# ------------------------------------------------------
+# File: config.yaml
+# Authors: Abraham Sotelo
+# Date: 2025-02-17
+#
+# Description: Workflow configuration file
+# ------------------------------------------------------
+
+state:
+  state_path: "data/state"
+  file_prefix: "workflow_state"
+
+preprocessing:
+  raw_samples_path: "data/raw"
+  dna_sequences_path: "data/dna_sequences"
+  raw_data_dictionary:
+    "39sample0": "N2212879_30-780318117_Meta_2023-02-21"
