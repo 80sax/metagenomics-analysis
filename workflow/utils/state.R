@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: state.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-14
+# Date: 2025-02-17
 #
 # Description: Data pipeline status management
 # ------------------------------------------------------
@@ -15,6 +15,18 @@ file_prefix <- config$file_prefix
 # ------------------------------------------------------
 # Internal functions
 # ------------------------------------------------------
+
+#' Creates a new state file at the specified path
+#'
+#' @param state_path Path where the state file will be created. Defaults to 'path'
+#'
+#' @return None
+#'
+#' @details This internal function is responsible for initializing a new state file
+#' at the specified location. The state file is used to track and maintain
+#' the application's state information.
+#'
+#' @keywords internal
 internal_create_state_file <- function(state_path = path) {
   cat("Creating state file", "\n")
   if (!dir.exists(state_path)) {
@@ -45,7 +57,8 @@ internal_create_state_file <- function(state_path = path) {
       last_modified = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
       version = version,
       number_of_samples = 0
-    )
+    ),
+    samples = list()
   )
   jsonlite::write_json(state, file, pretty = TRUE, auto_unbox = TRUE)
   cat("New state file created:", file, "\n")
@@ -55,3 +68,8 @@ internal_create_state_file <- function(state_path = path) {
 # ------------------------------------------------------
 # External functions
 # ------------------------------------------------------
+
+
+write_state <- function() {
+
+}
