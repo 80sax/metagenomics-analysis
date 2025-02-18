@@ -33,3 +33,29 @@ test_that("empty state file is created correctly", {
   # Cleanup
   unlink(temp_dir, recursive = TRUE)
 })
+
+
+test_that("state file is updated correctly", {
+  # Setup
+  temp_dir <- tempdir()
+  file_1_0 <- paste0(temp_dir, "/", file_prefix, "_v1.0.json")
+
+  # Test
+  utils::capture.output({
+    internal_create_state_file(state_path = temp_dir)
+    data <- list(texts = c("text1", "text2"), number = 0)
+    update_state(state_file = file_1_0, sample = "sample1", stage = "stage1", data = data)
+  })
+  json_data <- jsonlite::fromJSON(file_1_0)
+
+  # Assertions
+  expect_true(file.exists(file_1_0))
+  expect_true("sample1" %in% names(json_data$samples))
+  expect_equal("stage1", json_data$samples$sample1$current_stage)
+  expect_true("stage1" %in% json_data$samples$sample1$stages)
+  expect_equal(json_data$samples$sample1$texts, data$texts)
+  expect_equal(json_data$samples$sample1$number, data$number)
+
+  # Cleanup
+  unlink(temp_dir, recursive = TRUE)
+})
