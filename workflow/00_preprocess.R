@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-17
+# Date: 2025-02-18
 #
 # Description: Load and clean DNA samples
 #
@@ -11,8 +11,9 @@
 # Outputs:
 #
 # ------------------------------------------------------
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages({
+                                library(magrittr)
+                                library(R.utils)})
 
 # Load configuration ------------------------------------
 source("workflow/utils/config.R")
@@ -27,11 +28,12 @@ raw_data_dictionary <- config$raw_data_dictionary
 # ------------------------------------------------------
 
 #' Clean DNA sequence filename
-#' 
+#'
 #' @param filename A string containing the filename to clean
 #' @return A string with "DNA-" prefix and ".gz" suffix removed, and fq extension replaced with fastq
 #' @keywords internal
 internal_clean_filename <- function(filename) {
+  . <- NULL # Placeholder for filename, hack to avoid no visible binding for global variable ‘.’
   sub("DNA-", "", filename) %>% sub("[.]gz$", "", .) %>% sub("[.]fq$", ".fastq", .)
 }
 
@@ -41,7 +43,7 @@ internal_clean_filename <- function(filename) {
 # ------------------------------------------------------
 
 #' Decompress raw DNA sample files
-#' 
+#'
 #' @param raw_samples_path Path to directory containing compressed raw samples
 #' @param dna_sequences_path Path to directory where decompressed files will be saved
 #' @param raw_data_dictionary Dictionary mapping source directories to destination directories
