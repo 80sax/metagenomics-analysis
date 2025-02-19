@@ -1,12 +1,13 @@
 # ------------------------------------------------------
 # File: test_00_preprocess.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-17
+# Date: 2025-02-18
 #
 # Description: Testing preprocessing
 # ------------------------------------------------------
 library(testthat)
 
+Sys.setenv(TESTING = "TRUE")
 setwd("..")
 source("workflow/00_preprocess.R")
 
@@ -50,3 +51,5 @@ test_that("Decompress raw samples", {
 
   unlink(temp, recursive = TRUE)
 })
+
+Sys.unsetenv("TESTING")
