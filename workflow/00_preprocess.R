@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-19
+# Date: 2025-02-20
 #
 # Description: Load and clean DNA samples
 #
@@ -64,6 +64,8 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
   for (dir in directories) {
     sample <- raw_data_dictionary[[dir]]
     new_dir <- file.path(dna_sequences_path, sample)
+    new_dir_fwd <- file.path(new_dir, "fwd")
+    new_dir_rev <- file.path(new_dir, "rev")
 
     # Check if these samples have been decompressed
     if (Sys.getenv("TESTING") != "TRUE") {
@@ -76,16 +78,18 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
     # Actual decompression
     cat("Decompressing files in directory:", dir, "\n")
     files <- list.files(file.path(raw_samples_path, dir), pattern = "\\.gz$")
-    decompressed_files_names <- file.path(new_dir, internal_clean_filename(files))
-    mapply(function(file, dest) {
-                                 cat("Decompressing file:", file, "->", dest, "\n")
-                                 gunzip(file, destname = dest, remove = FALSE, overwrite = TRUE)},
+    decompressed_files_names <- internal_clean_filename(files)
+    mapply(function(file, new_file) {
+                                     dest_dir <- ifelse(grepl("1[.]fastq", new_file), new_dir_fwd, new_dir_rev)
+                                     dest <- file.path(dest_dir, new_file)
+                                     cat("Decompressing file:", file, "->", dest, "\n")
+                                     gunzip(file, destname = dest, remove = FALSE, overwrite = TRUE)},
     file.path(raw_samples_path, dir, files), decompressed_files_names)
 
     # Update state
     if (Sys.getenv("TESTING") != "TRUE") {
-      decompressed_files <- list.files(new_dir)
-      decompressed_files_paths <- file.path(new_dir, decompressed_files)
+      decompressed_files <- list.files(new_dir, recursive = TRUE)
+      decompressed_files_paths <- list.files(new_dir, full.names = TRUE, recursive = TRUE)
       print(decompressed_files)
       data <- list(
         raw_directory = file.path(raw_samples_path, dir),
