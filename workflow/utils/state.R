@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: state.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-17
+# Date: 2025-02-19
 #
 # Description: Data pipeline status management
 # ------------------------------------------------------
@@ -64,6 +64,48 @@ internal_create_state_file <- function(state_path = path) {
   cat("New state file created:", file, "\n")
 }
 
+#' Load State from JSON File
+#'
+#' This function loads the state from a JSON file. If no specific state file is provided,
+#' it will search for state files with the specified prefix and load the most recent one.
+#' If no state file exists, it will create a new one.
+#'
+#' @param state_file Optional. Path to a specific state file to load. If NULL (default),
+#'                   the function will look for state files in the current path and load
+#'                   the most recent one.
+#'
+#' @return A list containing the state data loaded from the JSON file
+#'
+#' @details The function looks for files matching the pattern "^{file_prefix}.*\.json$"
+#'          in the current path when no specific state file is provided.
+#'          If no matching files are found, it creates a new state file using
+#'          internal_create_state_file().
+#'
+#' @examples
+#' # Load most recent state file
+#' state <- load_state()
+#'
+#' # Load specific state file
+#' state <- load_state("path/to/state.json")
+#'
+#' @importFrom jsonlite read_json
+#' @keywords internal
+load_state <- function(state_file = NULL) {
+  # If no state file is provided, find the latest one
+  if (is.null(state_file)) {
+    state_file <- list.files(path, pattern = paste0("^", file_prefix, ".*\\.json$"), full.names = TRUE)
+    if (length(state_file) == 0) {
+      internal_create_state_file()
+      state_file <- list.files(path, pattern = paste0("^", file_prefix, ".*\\.json$"), full.names = TRUE)
+    }
+    latest_state_file <- max(state_file)
+  } else {
+    latest_state_file <- state_file
+  }
+  cat("State file loaded:", latest_state_file, "\n")
+  state <- jsonlite::read_json(latest_state_file)
+  list(state = state, file_state = latest_state_file)
+}
 
 # ------------------------------------------------------
 # External functions
@@ -88,20 +130,9 @@ internal_create_state_file <- function(state_path = path) {
 #'
 update_state <- function(state_file = NULL, sample, stage, data) {
   # Load state
-  # If no state file is provided, find the latest one
-  cat("Updating sample:", sample, "\n")
-  if (is.null(state_file)) {
-    state_file <- list.files(path, pattern = paste0("^", file_prefix, ".*\\.json$"), full.names = TRUE)
-    if (length(state_file) == 0) {
-      internal_create_state_file()
-      state_file <- list.files(path, pattern = paste0("^", file_prefix, ".*\\.json$"), full.names = TRUE)
-    }
-    latest_state_file <- max(state_file)
-  } else {
-    latest_state_file <- state_file
-  }
-  cat("State file loaded:", latest_state_file, "\n")
-  state <- jsonlite::read_json(latest_state_file)
+  load_state_result <- load_state(state_file)
+  state <- load_state_result$state
+  state_file <- load_state_result$file_state
 
   # Getting the sample object
   if (!sample %in% names(state$samples)) {
@@ -121,5 +152,15 @@ update_state <- function(state_file = NULL, sample, stage, data) {
   cat("Actions conducted so far:", toString(sample_object$stages), "\n")
   cat("Data updated:", jsonlite::toJSON(data, pretty = TRUE), "\n")
   state$samples[[sample]] <- sample_object
-  jsonlite::write_json(state, latest_state_file, pretty = TRUE, auto_unbox = TRUE)
+  jsonlite::write_json(state, state_file, pretty = TRUE, auto_unbox = TRUE)
+}
+
+
+check_sample_stage <- function(state_file = NULL, sample, stage, data) {
+  # Load state
+  load_state_result <- load_state(state_file)
+  state <- load_state_result$state
+  state_file <- load_state_result$file_state
+
+  return(sample %in% names(state$samples) && stage %in% state$samples[[sample]]$stages)
 }
