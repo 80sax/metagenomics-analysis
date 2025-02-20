@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: test_00_preprocess.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-18
+# Date: 2025-02-20
 #
 # Description: Testing preprocessing
 # ------------------------------------------------------
@@ -11,10 +11,10 @@ Sys.setenv(TESTING = "TRUE")
 setwd("..")
 source("workflow/00_preprocess.R")
 
-raw_files <- c("DNA-12345.fq.gz", "67890.fq.gz", "file.txt")
+raw_files <- c("DNA-12345_1.fq.gz", "67890_2.fq.gz", "file.txt")
 
 test_that("Clean raw samples file names", {
-  expect_equal(internal_clean_filename(raw_files), c("12345.fastq", "67890.fastq", "file.txt"))
+  expect_equal(internal_clean_filename(raw_files), c("12345_1.fastq", "67890_2.fastq", "file.txt"))
 })
 
 test_that("Decompress raw samples", {
@@ -42,10 +42,10 @@ test_that("Decompress raw samples", {
   })
 
   # Assertions
-  expect_true(file.exists(file.path(temp, dest, samples[1], "12345.fastq")))
-  expect_true(file.exists(file.path(temp, dest, samples[1], "67890.fastq")))
-  expect_true(file.exists(file.path(temp, dest, samples[2], "12345.fastq")))
-  expect_true(file.exists(file.path(temp, dest, samples[2], "67890.fastq")))
+  expect_true(file.exists(file.path(temp, dest, samples[1], "fwd", "12345_1.fastq")))
+  expect_true(file.exists(file.path(temp, dest, samples[1], "rev", "67890_2.fastq")))
+  expect_true(file.exists(file.path(temp, dest, samples[2], "fwd", "12345_1.fastq")))
+  expect_true(file.exists(file.path(temp, dest, samples[2], "rev", "67890_2.fastq")))
   expect_false(file.exists(file.path(temp, dest, samples[1], "file.txt")))
   expect_false(file.exists(file.path(temp, dest, samples[2], "file.txt")))
 
