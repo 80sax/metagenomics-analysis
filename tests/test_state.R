@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: test_state.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-17
+# Date: 2025-02-19
 #
 # Description: Testing state management
 # ------------------------------------------------------
@@ -39,11 +39,10 @@ test_that("state file is updated correctly", {
   # Setup
   temp_dir <- tempdir()
   file_1_0 <- paste0(temp_dir, "/", file_prefix, "_v1.0.json")
-
-  # Test
   utils::capture.output({
     internal_create_state_file(state_path = temp_dir)
     data <- list(texts = c("text1", "text2"), number = 0)
+    # Test
     update_state(state_file = file_1_0, sample = "sample1", stage = "stage1", data = data)
   })
   json_data <- jsonlite::fromJSON(file_1_0)
@@ -55,6 +54,26 @@ test_that("state file is updated correctly", {
   expect_true("stage1" %in% json_data$samples$sample1$stages)
   expect_equal(json_data$samples$sample1$texts, data$texts)
   expect_equal(json_data$samples$sample1$number, data$number)
+
+  # Cleanup
+  unlink(temp_dir, recursive = TRUE)
+})
+
+
+test_that("state file is checked correctly", {
+  # Setup
+  temp_dir <- tempdir()
+  file_1_0 <- paste0(temp_dir, "/", file_prefix, "_v1.0.json")
+  utils::capture.output({
+    internal_create_state_file(state_path = temp_dir)
+    data <- list(texts = c("text1", "text2"), number = 0)
+    update_state(state_file = file_1_0, sample = "sample1", stage = "stage1", data = data)
+
+    # Test
+    expect_true(check_sample_stage(state_file = file_1_0, sample = "sample1", stage = "stage1"))
+    expect_false(check_sample_stage(state_file = file_1_0, sample = "sample1", stage = "stage2"))
+    expect_false(check_sample_stage(state_file = file_1_0, sample = "sample2", stage = "stage2"))
+  })
 
   # Cleanup
   unlink(temp_dir, recursive = TRUE)
