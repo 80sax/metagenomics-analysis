@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-18
+# Date: 2025-02-19
 #
 # Description: Load and clean DNA samples
 #
@@ -25,6 +25,7 @@ raw_data_dictionary <- config$raw_data_dictionary
 # Load state management ----------------------------------
 source("workflow/utils/state.R")
 update_state <- update_state
+check_sample_stage <- check_sample_stage
 
 # ------------------------------------------------------
 # Internal functions
@@ -61,9 +62,21 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
   }
   directories <- list.dirs(raw_samples_path, full.names = FALSE, recursive = FALSE)
   for (dir in directories) {
+    sample <- raw_data_dictionary[[dir]]
+    new_dir <- file.path(dna_sequences_path, sample)
+
+    # Check if these samples have been decompressed
+    if (Sys.getenv("TESTING") != "TRUE") {
+      if (check_sample_stage(sample = sample, stage = "decompress")) {
+        cat("Sample", sample, "already decompressed", "\n")
+        next
+      }
+    }
+
+    # Actual decompression
     cat("Decompressing files in directory:", dir, "\n")
     files <- list.files(file.path(raw_samples_path, dir), pattern = "\\.gz$")
-    decompressed_files_names <- file.path(dna_sequences_path, raw_data_dictionary[[dir]], internal_clean_filename(files))
+    decompressed_files_names <- file.path(new_dir, internal_clean_filename(files))
     mapply(function(file, dest) {
                                  cat("Decompressing file:", file, "->", dest, "\n")
                                  gunzip(file, destname = dest, remove = FALSE, overwrite = TRUE)},
@@ -71,8 +84,8 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
 
     # Update state
     if (Sys.getenv("TESTING") != "TRUE") {
-      decompressed_files <- list.files(file.path(dna_sequences_path, raw_data_dictionary[[dir]]))
-      decompressed_files_paths <- file.path(dna_sequences_path, raw_data_dictionary[[dir]], decompressed_files)
+      decompressed_files <- list.files(new_dir)
+      decompressed_files_paths <- file.path(new_dir, decompressed_files)
       print(decompressed_files)
       data <- list(
         raw_directory = file.path(raw_samples_path, dir),
@@ -81,12 +94,12 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
         raw_size = paste(round(sum(file.size(file.path(raw_samples_path, dir, files))) / 1024^3, 2), "GB"),
         decompress_date = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
         decompress_files = decompressed_files,
-        decompress_files_number = length(list.files(file.path(dna_sequences_path, raw_data_dictionary[[dir]]))),
-        decompress_directory = file.path(dna_sequences_path, raw_data_dictionary[[dir]]),
+        decompress_files_number = length(list.files(new_dir)),
+        decompress_directory = new_dir,
         decompress_size = paste(round(sum(file.size(decompressed_files_paths)) / 1024^3, 2), "GB"),
         decompress_time = paste(round(as.numeric(difftime(Sys.time(), start_time, units = "sec")), 2), "sec")
       )
-      update_state(state_file = , sample = dir, stage = "decompress", data = data)
+      update_state(sample = sample, stage = "decompress", data = data)
     }
   }
 }
