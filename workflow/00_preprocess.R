@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-20
+# Date: 2025-02-23
 #
 # Description: Load and clean DNA samples
 #
@@ -105,6 +105,47 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
       )
       update_state(sample = sample, stage = "decompress", data = data)
     }
+  }
+}
+
+
+#' Identify Lines with Mismatched Sequence and Quality Lengths in FASTQ Files
+#'
+#' This function reads a FASTQ file and identifies lines where the sequence length
+#' does not match its corresponding quality score length, which indicates potential
+#' data corruption or format issues.
+#'
+#' @param file character, Path to the FASTQ file to be analyzed
+#'
+#' @return Returns either:
+#'   - A numeric vector containing the indices of faulty lines where sequence and quality lengths don't match
+#'   - NULL if no faulty lines are found
+#'
+#' @details
+#' The function works by:
+#' 1. Reading the file line by line
+#' 2. Comparing the lengths of sequence lines (every 2nd line) with their corresponding quality score lines (every 4th line)
+#' 3. Identifying any mismatches between these lengths
+#'
+#' @examples
+#' \dontrun{
+#' faulty_lines <- identify_faulty_lines("path/to/fastq/file.fastq")
+#' }
+#'
+#' @keywords file-processing internal
+identify_faulty_lines <- function(file) {
+  cat("Analysing file:", file, "\n")
+  lines <- readLines(file)
+  cat("Number of lines:", length(lines), "\n")
+  seqlens <- sapply(lines[seq(2, length(lines), 4)], nchar, USE.NAMES = FALSE)
+  quallens <- sapply(lines[seq(4, length(lines), 4)], nchar, USE.NAMES = FALSE)
+  faulty_lines <- which(seqlens != quallens)
+  if (length(faulty_lines) > 0) {
+    cat("Faulty lines:", faulty_lines, "\n")
+    return(faulty_lines)
+  } else {
+    cat("No faulty lines found", "\n")
+    return(NULL)
   }
 }
 

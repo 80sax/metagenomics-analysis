@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: test_00_preprocess.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-20
+# Date: 2025-02-23
 #
 # Description: Testing preprocessing
 # ------------------------------------------------------
@@ -50,6 +50,48 @@ test_that("Decompress raw samples", {
   expect_false(file.exists(file.path(temp, dest, samples[2], "file.txt")))
 
   unlink(temp, recursive = TRUE)
+})
+
+test_that("Getting faulty lines in samples", {
+  # Setup
+  temp    <- tempdir()
+  correct_fastq <- c(
+    "@SEQ_ID_1",
+    "AGCTTAGCTAGCTACG",  # Sequence line
+    "+",
+    "!!''**))%%%%%%^^",   # Quality line
+    "@SEQ_ID_2",
+    "CGTAGCTAGCTA",      # Sequence line
+    "+",
+    "!!**%%$$$###"      # Quality line
+  )
+
+  faulty_fastq <- c(
+    "@SEQ_ID_1",
+    "AGCTTAGCTAGCTACG",  # Sequence line
+    "+",
+    "!!''**))%%%%%%^^",   # Quality line
+    "@SEQ_ID_2",
+    "CGTAGCTAGCTA",      # Sequence line
+    "+",
+    "!!**%%$$$###@",      # Quality line
+    "@SEQ_ID_3",
+    "AGCTTAGCTAGCTACG",  # Sequence line
+    "+",
+    "!!''**))%%%%%%^^",   # Quality line
+    "@SEQ_ID_4",
+    "CGTAGCTAGCTA",      # Sequence line
+    "+",
+    "!!**%%$$$###@"      # Quality line
+  )
+  writeLines(correct_fastq, file.path(temp, "correct.fastq"))
+  writeLines(faulty_fastq, file.path(temp, "faulty.fastq"))
+
+  #Testing
+  utils::capture.output({
+    expect_equal(identify_faulty_lines(file.path(temp, "correct.fastq")), NULL)
+    expect_equal(identify_faulty_lines(file.path(temp, "faulty.fastq")), c(2, 4))
+  })
 })
 
 Sys.unsetenv("TESTING")
