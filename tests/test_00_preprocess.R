@@ -84,13 +84,15 @@ test_that("Getting faulty lines in samples", {
     "+",
     "!!**%%$$$###@"      # Quality line
   )
-  writeLines(correct_fastq, file.path(temp, "correct.fastq"))
-  writeLines(faulty_fastq, file.path(temp, "faulty.fastq"))
+  correct_file <- file.path(temp, "correct.fastq")
+  faulty_file <- file.path(temp, "faulty.fastq")
+  writeLines(correct_fastq, correct_file)
+  writeLines(faulty_fastq, faulty_file)
 
   #Testing
   utils::capture.output({
-    expect_equal(identify_faulty_lines(file.path(temp, "correct.fastq")), NULL)
-    expect_equal(identify_faulty_lines(file.path(temp, "faulty.fastq")), c(2, 4))
+    expect_equal(identify_faulty_lines_file(correct_file), NULL)
+    expect_equal(identify_faulty_lines_file(faulty_file), setNames(list(c(2, 4)), faulty_file))
   })
 })
 

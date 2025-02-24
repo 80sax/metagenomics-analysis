@@ -22,10 +22,12 @@ raw_samples_path <- config$raw_samples_path
 dna_sequences_path <- config$dna_sequences_path
 raw_data_dictionary <- config$raw_data_dictionary
 
-# Load state management ----------------------------------
+# Load state management and orchestration --------------
 source("workflow/utils/state.R")
 update_state <- update_state
 check_sample_stage <- check_sample_stage
+source("workflow/utils/orchestrate.R")
+apply_stage_to_project <- apply_stage_to_project
 
 # ------------------------------------------------------
 # Internal functions
@@ -133,7 +135,7 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
 #' }
 #'
 #' @keywords file-processing internal
-identify_faulty_lines <- function(file) {
+identify_faulty_lines_file <- function(file) {
   cat("Analysing file:", file, "\n")
   lines <- readLines(file)
   cat("Number of lines:", length(lines), "\n")
@@ -142,11 +144,26 @@ identify_faulty_lines <- function(file) {
   faulty_lines <- which(seqlens != quallens)
   if (length(faulty_lines) > 0) {
     cat("Faulty lines:", faulty_lines, "\n")
-    return(faulty_lines)
+    return(setNames(list(faulty_lines), file))
   } else {
     cat("No faulty lines found", "\n")
     return(NULL)
   }
+}
+
+
+identify_faulty_lines_sample <- function(sample_dir, output_dir) {
+  cat("Identifying faulty lines in sample:", sample_dir, "\n")
+  fwd_files <- list.files(file.path(sample_dir, "fwd"), full.names = TRUE)
+  rev_files <- list.files(file.path(sample_dir, "rev"), full.names = TRUE)
+  files <- c(fwd_files, rev_files)
+  faulty_lines <- lapply(files, identify_faulty_lines_file)
+  faulty_lines <- faulty_lines[!sapply(faulty_lines, is.null)]
+  return(list(faulty_files = faulty_lines))
+}
+
+identify_faulty_lines <- function(dna_sequences_path) {
+  apply_stage_to_project(dna_sequences_path, stage = "faulty_lines", func = identify_faulty_lines_sample)
 }
 
 
@@ -156,4 +173,5 @@ identify_faulty_lines <- function(file) {
 preprocessing <- function() {
   cat("Preprocessing DNA samples", "\n")
   decompress_raw_samples(raw_samples_path, dna_sequences_path, raw_data_dictionary)
+  identify_faulty_lines(dna_sequences_path)
 }
