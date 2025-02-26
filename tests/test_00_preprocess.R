@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: test_00_preprocess.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-23
+# Date: 2025-02-25
 #
 # Description: Testing preprocessing
 # ------------------------------------------------------
@@ -52,38 +52,39 @@ test_that("Decompress raw samples", {
   unlink(temp, recursive = TRUE)
 })
 
-test_that("Getting faulty lines in samples", {
+correct_fastq <- c(
+  "@SEQ_ID_1",
+  "AGCTTAGCTAGCTACG",  # Sequence line
+  "+",
+  "!!''**))%%%%%%^^",   # Quality line
+  "@SEQ_ID_2",
+  "CGTAGCTAGCTA",      # Sequence line
+  "+",
+  "!!**%%$$$###"      # Quality line
+)
+
+faulty_fastq <- c(
+  "@SEQ_ID_1",
+  "AGCTTAGCTAGCTACG",  # Sequence line
+  "+",
+  "!!''**))%%%%%%^^",   # Quality line
+  "@SEQ_ID_2",
+  "CGTAGCTAGCTA",      # Sequence line
+  "+",
+  "!!**%%$$$###@",      # Quality line
+  "@SEQ_ID_3",
+  "AGCTTAGCTAGCTACG",  # Sequence line
+  "+",
+  "!!''**))%%%%%%^^",   # Quality line
+  "@SEQ_ID_4",
+  "CGTAGCTAGCTA",      # Sequence line
+  "+",
+  "!!**%%$$$###@"      # Quality line
+)
+
+test_that("Getting faulty lines in file", {
   # Setup
   temp    <- tempdir()
-  correct_fastq <- c(
-    "@SEQ_ID_1",
-    "AGCTTAGCTAGCTACG",  # Sequence line
-    "+",
-    "!!''**))%%%%%%^^",   # Quality line
-    "@SEQ_ID_2",
-    "CGTAGCTAGCTA",      # Sequence line
-    "+",
-    "!!**%%$$$###"      # Quality line
-  )
-
-  faulty_fastq <- c(
-    "@SEQ_ID_1",
-    "AGCTTAGCTAGCTACG",  # Sequence line
-    "+",
-    "!!''**))%%%%%%^^",   # Quality line
-    "@SEQ_ID_2",
-    "CGTAGCTAGCTA",      # Sequence line
-    "+",
-    "!!**%%$$$###@",      # Quality line
-    "@SEQ_ID_3",
-    "AGCTTAGCTAGCTACG",  # Sequence line
-    "+",
-    "!!''**))%%%%%%^^",   # Quality line
-    "@SEQ_ID_4",
-    "CGTAGCTAGCTA",      # Sequence line
-    "+",
-    "!!**%%$$$###@"      # Quality line
-  )
   correct_file <- file.path(temp, "correct.fastq")
   faulty_file <- file.path(temp, "faulty.fastq")
   writeLines(correct_fastq, correct_file)
@@ -95,5 +96,35 @@ test_that("Getting faulty lines in samples", {
     expect_equal(identify_faulty_lines_file(faulty_file), setNames(list(c(2, 4)), faulty_file))
   })
 })
+
+
+test_that("Getting faulty lines in sample", {
+  # Setup
+  temp <- tempdir()
+  sample_dir <- file.path(temp, "sample")
+  dirs <- c("fwd", "rev")
+
+  sapply(dirs, function(d) dir.create(file.path(sample_dir, d), recursive = TRUE))
+  files <- list(
+    correct = file.path(sample_dir, "fwd", "correct.fastq"),
+    faulty1 = file.path(sample_dir, "rev", "faulty1.fastq"),
+    faulty2 = file.path(sample_dir, "rev", "faulty2.fastq")
+  )
+  mapply(writeLines, list(correct_fastq, faulty_fastq, faulty_fastq), files)
+
+  # Testing
+  utils::capture.output({
+    expect_equal(identify_faulty_lines_sample(sample_dir),
+      list(faulty_files = setNames(
+        list(c(2, 4), c(2, 4)),          # List of faulty lines for both files
+        c(files$faulty1, files$faulty2)  # Corresponding file names
+      ))
+    )
+  })
+
+  # Cleanup
+  unlink(temp, recursive = TRUE)
+})
+
 
 Sys.unsetenv("TESTING")

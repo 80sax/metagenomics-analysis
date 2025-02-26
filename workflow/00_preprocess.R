@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-23
+# Date: 2025-02-25
 #
 # Description: Load and clean DNA samples
 #
@@ -152,16 +152,59 @@ identify_faulty_lines_file <- function(file) {
 }
 
 
-identify_faulty_lines_sample <- function(sample_dir, output_dir) {
+#' Identify Faulty Lines in Sample Directory
+#'
+#' This function examines all forward and reverse sequence files in a sample directory
+#' to identify faulty lines in each file.
+#'
+#' @param sample_dir Character string specifying the path to the sample directory
+#'   containing 'fwd' and 'rev' subdirectories with sequence files
+#'
+#' @return A list with one element:
+#'   \describe{
+#'     \item{faulty_files}{A list of identified faulty lines from all files,
+#'       with NULL results filtered out}
+#'   }
+#'
+#' @details
+#' The function looks for sequence files in both 'fwd' and 'rev' subdirectories
+#' of the provided sample directory. It processes each file to identify faulty lines
+#' and combines the results into a single list.
+#'
+#' @seealso identify_faulty_lines_file
+#'
+#' @examples
+#' \dontrun{
+#' faulty_lines <- identify_faulty_lines_sample("path/to/sample/directory")
+#' }
+identify_faulty_lines_sample <- function(sample_dir, ...) {
   cat("Identifying faulty lines in sample:", sample_dir, "\n")
   fwd_files <- list.files(file.path(sample_dir, "fwd"), full.names = TRUE)
   rev_files <- list.files(file.path(sample_dir, "rev"), full.names = TRUE)
   files <- c(fwd_files, rev_files)
-  faulty_lines <- lapply(files, identify_faulty_lines_file)
+  faulty_lines <- unlist(lapply(files, identify_faulty_lines_file), recursive = FALSE)
   faulty_lines <- faulty_lines[!sapply(faulty_lines, is.null)]
   return(list(faulty_files = faulty_lines))
 }
 
+#' Identifies faulty lines in DNA sequence data across samples
+#'
+#' This function processes DNA sequence data files to identify problematic or faulty lines
+#' by applying a sample-level fault detection function across all samples in a project.
+#'
+#' @param dna_sequences_path Character string specifying the path to the DNA sequences data
+#'
+#' @return List of identified faulty lines per sample
+#'
+#' @details
+#' The function utilizes the `apply_stage_to_project` framework to process multiple samples,
+#' applying the `identify_faulty_lines_sample` function to each individual sample file.
+#'
+#' @seealso
+#' \code{\link{identify_faulty_lines_sample}}
+#' \code{\link{apply_stage_to_project}}
+#'
+#' @export
 identify_faulty_lines <- function(dna_sequences_path) {
   apply_stage_to_project(dna_sequences_path, stage = "faulty_lines", func = identify_faulty_lines_sample)
 }
