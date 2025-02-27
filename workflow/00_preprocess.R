@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-25
+# Date: 2025-02-26
 #
 # Description: Load and clean DNA samples
 #
@@ -12,8 +12,9 @@
 #
 # ------------------------------------------------------
 suppressPackageStartupMessages({
-                                library(magrittr)
-                                library(R.utils)})
+  library(magrittr)
+  library(R.utils)
+})
 
 # Load configuration ------------------------------------
 source("workflow/utils/config.R")
@@ -81,12 +82,14 @@ decompress_raw_samples <- function(raw_samples_path, dna_sequences_path, raw_dat
     cat("Decompressing files in directory:", dir, "\n")
     files <- list.files(file.path(raw_samples_path, dir), pattern = "\\.gz$")
     decompressed_files_names <- internal_clean_filename(files)
-    mapply(function(file, new_file) {
-                                     dest_dir <- ifelse(grepl("1[.]fastq", new_file), new_dir_fwd, new_dir_rev)
-                                     dest <- file.path(dest_dir, new_file)
-                                     cat("Decompressing file:", file, "->", dest, "\n")
-                                     gunzip(file, destname = dest, remove = FALSE, overwrite = TRUE)},
-    file.path(raw_samples_path, dir, files), decompressed_files_names)
+    mapply(
+      function(file, new_file) {
+        dest_dir <- ifelse(grepl("1[.]fastq", new_file), new_dir_fwd, new_dir_rev)
+        dest <- file.path(dest_dir, new_file)
+        cat("Decompressing file:", file, "->", dest, "\n")
+        gunzip(file, destname = dest, remove = FALSE, overwrite = TRUE)
+      }, file.path(raw_samples_path, dir, files), decompressed_files_names
+    )
 
     # Update state
     if (Sys.getenv("TESTING") != "TRUE") {
