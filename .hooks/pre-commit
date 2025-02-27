@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Update the date in modified R files
-files=$(git diff --cached --name-only --diff-filter=d | grep -E '\.(R|r)$')
+# Update the date in modified R and config files
+files=$(git diff --cached --name-only --diff-filter=d | grep -E '\.(R|r)$|config\.yaml$')
 for file in $files; do
     sed -i 's/^# Date: .*/# Date: '"$(date +%Y-%m-%d)"'/' "$file"
     if [ -f "$file" ]; then
@@ -12,4 +12,5 @@ done
 # Remove vscode settings from staging to avoid publishing local paths
 git restore --staged .vscode/settings.json
 
-exit 0
+# Run tests
+./run_tests.sh
