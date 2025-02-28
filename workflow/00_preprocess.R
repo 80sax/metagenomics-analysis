@@ -1,7 +1,7 @@
 # ------------------------------------------------------
 # File: load_DNA_samples.R
 # Authors: Abraham Sotelo
-# Date: 2025-02-26
+# Date: 2025-02-27
 #
 # Description: Load and clean DNA samples
 #
@@ -213,6 +213,37 @@ identify_faulty_lines <- function(dna_sequences_path) {
 }
 
 
+#Quality profile
+
+
+
+quality_profile_sample <- function(sample_dir) {
+  start_time <- Sys.time()
+  cat("Plotting quality profile for sample:", sample_dir, "\n")
+  fwd_files <- list.files(file.path(sample_dir, "fwd"), full.names = TRUE)
+  rev_files <- list.files(file.path(sample_dir, "rev"), full.names = TRUE)
+
+  number_of_files <- length(fwd_files)
+  number_of_samples <- min(number_of_files, 12)
+
+  fwd_samples <- fwd_files[sample(1:number_of_files, number_of_samples, replace = FALSE)]
+  rev_samples <- rev_files[sample(1:number_of_files, number_of_samples, replace = FALSE)]
+
+  cat("Forward samples:", fwd_samples, sep = "\n")
+  cat("Reverse samples:", rev_samples, sep = "\n")
+
+  p <- dada2:::plotQualityProfile(fwd_samples)
+  #q <- dada2:::plotQualityProfile(rev_samples)
+
+  #ggplot2::ggsave("quality_profile.png", plot = p, width = 8, height = 6, dpi = 300)
+  #ggplot2::ggsave("quality_profile.pdf", plot = q, width = 8, height = 6)
+
+  saveRDS(p, "quality_profile_plot.rds")  # Save to file
+  print(difftime(Sys.time(), start_time, units = "sec"))
+}
+
+
+
 # ------------------------------------------------------
 # Workflow
 # ------------------------------------------------------
@@ -220,4 +251,5 @@ preprocessing <- function() {
   cat("Preprocessing DNA samples", "\n")
   decompress_raw_samples(raw_samples_path, dna_sequences_path, raw_data_dictionary)
   identify_faulty_lines(dna_sequences_path)
+  quality_profile(dna_sequences_path)
 }
